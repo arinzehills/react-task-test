@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import LogoutButton from "../components/LogoutButton";
 import MkdSDK from "../utils/MkdSDK";
 import Table from "../components/Table/Table";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { DndProvider } from "react-dnd";
 
 const AdminDashboardPage = () => {
   const [loading, setLoading] = useState(false);
@@ -45,17 +47,22 @@ const AdminDashboardPage = () => {
           <h1 className="text-4xl font-bold">APP</h1>
           <LogoutButton />
         </div>
-        <Table
-          loading={loading}
-          data={tableData}
-          onClickRow={(order) =>
-            navigate("/admin/order-details", {
-              state: { order_id: order.order_id },
-            })
-          }
-          // data={tableData}
-          columnData={columnData}
-        />
+        <div className="px-12 w-full flex justify-between items-center  text-white">
+          <h1 className="text-4xl font-bold my-3">Todays' Leaders Dashboard</h1>
+        </div>
+        <DndProvider backend={HTML5Backend}>
+          <Table
+            loading={loading}
+            data={tableData}
+            onClickRow={(order) =>
+              navigate("/admin/order-details", {
+                state: { order_id: order.order_id },
+              })
+            }
+            // data={tableData}
+            columnData={columnData}
+          />
+        </DndProvider>
         <div className="flex items-center ">
           <button
             className="bg-lime-500 text-white px-4 py-2 rounded-full flex items-center space-x-2 hover:bg-lime-600"
