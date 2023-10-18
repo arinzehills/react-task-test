@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import MkdSDK from "../utils/MkdSDK";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../authContext";
+import { GlobalContext, showToast } from "../globalContext";
 
 const AdminLoginPage = () => {
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { state, dispatch } = useContext(GlobalContext);
   const schema = yup
     .object({
       email: yup.string().email().required(),
@@ -14,12 +18,13 @@ const AdminLoginPage = () => {
     })
     .required();
 
-  const { dispatch } = React.useContext(AuthContext);
+  const { dispatch: authDispatch } = React.useContext(AuthContext);
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
-    setError,
+    // setError,
+    // error,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
@@ -28,6 +33,19 @@ const AdminLoginPage = () => {
   const onSubmit = async (data) => {
     let sdk = new MkdSDK();
     //TODO
+    setLoading(true);
+    var res = await sdk.login(data.email, data.password, "admin");
+    console.log("res");
+    console.log(res.error);
+    if (res.error) {
+      setError(res.message);
+    } else {
+      authDispatch({ type: "LOGIN", payload: res });
+      navigate("/admin/dashboard");
+      showToast(dispatch, res.message ?? "Logged in successfully!");
+    }
+    setLoading(false);
+    // console.log(error);
   };
 
   return (
@@ -76,10 +94,12 @@ const AdminLoginPage = () => {
         <div className="flex items-center justify-between">
           <input
             type="submit"
+            disabled={loading}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            value="Sign In"
+            value={loading ? "Signing in..." : "Sign In"}
           />
         </div>
+        <p style={{ color: "red" }}>{error}</p>
       </form>
     </div>
   );
